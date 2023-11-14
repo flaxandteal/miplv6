@@ -1,0 +1,35 @@
+v. 0.9.5.1 -> v. 1.0
+
+- Support for draft24 / mipv6 proposed standard vs. draft 19 in MIPL 0.9.5.1
+
+- Fully modular architecture. MIPL now consists of CN/HA/MN modules,
+which can be dynamically loaded. 
+
+- Moving of home address is now done automatically. See man network-mip6.conf for
+details on how this can be used. 
+
+- Handoff occurrs only after duplicate address detection for CoA has finished. 
+
+- MN sends BUs to CNs only after completing its home registration
+(receives a BA) first. This should improve handoff performance by
+approximately 1s.
+
+- Anycast support is used in HA and anycast addresses are
+automatically configured based on HA's own RAs. Multiple HAs can now
+exist on same link. See INSTALL for details.
+
+- Configuration of mipv6 information in MN is done via rtnetlink ->
+new interface between mipdiag and mipv6 module in kernel. Update
+mipdiag and scripts and configuration files!
+
+- Home address is configured to mip6mnha1 device on startup with prefix length 
+  128.  
+
+- ICMP prefix discovery is now disabled, since this functionality
+in MIPv6 is broken in many ways.
+
+- Added new configuration variable: 
+/proc/sys/net/ipv6/mobility/accept_return_routability, which 
+controls use of route optimization in CN and MN, default is 1 (on).
+
+- Numerous bugfixes...

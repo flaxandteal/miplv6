@@ -1,0 +1,44 @@
+MIPL Mobile IPv6 version 1.0 
+
+MIPL Mobile IPv6 is an implementation of the Mobile IPv6 specification
+for Linux.  The software provides transparent mobility to applications
+which use IPv6 by implementing draft-ietf-mobileip-ipv6-19.  It works
+at least with the kernel version indicated in the package name. The
+software has been tested against another implementation based on
+draft19 and most features seemed to interoperate well. However, the
+software probably does not work with pre-draft19 implementations of
+Mobile IPv6 at all, due to changes in the protocol specification.
+
+The software was developed as part of a software development project
+course at the Helsinki University of Technology.  The project's goal
+was to create a prototype implementation of Mobile IPv6 for Linux.
+The project group consisted of: Sami Kivisaari, Niklas Kämpe, Juha
+Mynttinen, Toni Nykänen, Henrik Petander and Antti Tuominen.  The
+software has been developed further by the GO research project at the
+computer science department of HUT.  Also the members of the MIPL
+mailing list have contributed to the development of this version by
+sending bug reports and patches.  See CREDITS.
+
+The package consists of a kernel module, kernel patches and userspace
+programs for configuration and installation of the kernel part.
+INSTALL and INSTALL.kernel files contain information about
+installation of userspace and kernel parts and man pages provide help
+for the use of the userspace tools.  Current issues with and
+limitations of the software are included in the ISSUES file.  Copyright,
+disclaimer and other legal issues are addressed in COPYING.
+
+The package and more information are available at:
+
+	http://www.mipl.mediapoli.com/
+
+To report bugs or to join the development work please subscribe to the
+MIPL mailing list(s).  There are two mailing lists called mipl and
+mipl-devel.  First one is for all MIPL related discussion and the
+other for development talk only.  Subscription pages, more information
+and list archives can be found at the project web site. Coordinators
+can be contacted at petander@tcs.hut.fi or anttit@tcs.hut.fi. Please
+use the mailing lists for all questions about technical problems.
+
+Henrik Petander,
+Helsinki University of Technology
+GO-CORE project

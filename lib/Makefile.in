@@ -1,0 +1,13 @@
+CC = @CC@
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+
+NLOBJ=ll_map.o libnetlink.o
+
+all: libnetlink.a
+
+libnetlink.a: $(NLOBJ)
+	ar rcs $@ $(NLOBJ)
+
+clean:
+	rm -f $(NLOBJ) libnetlink.a Makefile

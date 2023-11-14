@@ -1,0 +1,33 @@
+CC = @CC@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+sbindir = @sbindir@
+
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+LDLIBS = @LDLIBS@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM=@INSTALL_PROGRAM@
+
+MIPDIAG=@MIPDIAG@
+MIPDIAG_OBJS=diag.o conf.o mipdiag.o
+
+IPV6TUNNEL=@IPV6TUNNEL@
+IPV6TUNNEL_OBJS=ipv6tunnel.o
+IPV6TUNNEL_C_FILES=ipv6tunnel.c
+
+all: $(MIPDIAG) $(IPV6TUNNEL)
+
+install: all
+	@$(INSTALL_PROGRAM) -m 0755 $(MIPDIAG) $(sbindir)/$(MIPDIAG)
+	@$(INSTALL_PROGRAM) -m 0755 $(IPV6TUNNEL) $(sbindir)/$(IPV6TUNNEL)
+
+$(IPV6TUNNEL): $(IPV6TUNNEL_C_FILES)
+	$(CC) $(CFLAGS) $? -o $@
+
+$(MIPDIAG): $(MIPDIAG_OBJS) $(LIBNETLINK)
+
+clean:
+	$(RM) -f $(MIPDIAG) $(MIPDIAG_OBJS) $(IPV6TUNNEL) Makefile

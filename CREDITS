@@ -1,0 +1,28 @@
+MIPL Mobile IPv6 for Linux was originally written by Sami Kivisaari,
+Niklas Kämpe, Toni Nykänen, Juha Mynttinen, Henrik Petander and Antti
+Tuominen.  This work was released in the first public release 0.5 in
+June 2000.
+
+Since GO/Core took over MIPL development summer 2000, Henrik Petander
+and Antti Tuominen remained in the development team.  Also Marko
+Myllynen and Jani Rönkkönen have done work on MIPL.  Jaakko Laine and
+Ville Nuorvala joined GO/Core and MIPL development as of summer 2001.
+
+Other people who have contributed to the MIPL development:
+
+Nanno Langstraat	<nal@dds.nl>
+Alexandru Petrescu	<petrescu@crm.mot.com>
+Venkata Jagana		<jagana@us.ibm.com>
+Krishna Kumar		<kumarkr@us.ibm.com>
+Teemu Rinta-Aho		<teemu.rinta-aho@nomadiclab.com>
+Tony Jokikyyny		<tony.jokikyyny@nomadiclab.com>
+Timo Koskiahde		<timo.koskiahde@nokia.com>
+Mika Grundström		<mika.grundstrom@nokia.com>
+Mika Lepistö		<mika.k.lepisto@nokia.com>
+Steven Ayer		<ayer@crl.dec.com>
+Jamie Hicks		<jamie.hicks@compaq.com>
+
+
+Thank you to everyone who have helped us!  If you're not on this list
+and think you should be, contact us.  Also thanks to everyone on the
+MIPL mailing list giving us problem reports etc.

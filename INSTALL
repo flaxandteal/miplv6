@@ -1,0 +1,153 @@
+INTRODUCTION
+
+Mobile IPv6 (or Mobility support in IPv6) provides transparent
+mobility for Internet Protocol version 6.  Protocols above IP should
+not be affected.
+
+This file describes how to install MIPL Mobile IPv6 for Linux
+userspace tools.  See INSTALL.kernel for the kernel part.
+
+
+INSTALLATION
+
+After you have succesfully installed and configured the kernel part of
+MIPL, you still have to compile and install the userspace tools.  Run
+'configure' to create Makefile and mobile-ip6 for your system.  Check
+that the Makefile directories are in order for your system.  Run
+'make' and 'make install' to compile and install userlevel tools, man
+pages, init scripts and example configuration files.  These are
+mandatory for the module to work correctly.  You also need to create
+the device file for MIPL with 'mknod /dev/mipv6_dev c 0xf9 0'. 
+
+You should also make sure that the include/linux directory
+(usr/include/linux in Red hat) is a symbolic link to the patched
+kernel's include/linux directory. Otherwise make will fail. 
+In that case, you can create the link by:
+
+1. First move the /usr/include/linux directory to a backup as root: 
+
+	mv /usr/include/linux /usr/include/linux-backup 
+
+2. Create a symbolic link (as root) to your new patched kernel sources:
+(replace "/usr/src/linux" with the directory in which your mipv6 patched 
+kernel sources are)
+
+	ln -s /usr/src/linux/include/linux /usr/include/linux
+
+
+The essential files are installed in following directories:
+
+mipdiag		/sbin			all
+
+man pages	/usr/man		all
+
+init script	/etc/rc.d/init.d	RH6
+		/etc/init.d		RH7-9 & Debian
+		/sbin/init.d		SuSE
+
+config files	/etc/sysconfig		RH6 - RH9
+		/etc			Debian & SuSE
+
+docs		/usr/share/doc		ALL
+
+Configuration scripts are tested only in RH9 and Debian.  They
+are not guaranteed to work on other systems.
+
+
+CONFIGURATION
+
+Now configure MIPL for your system.  MIPL configuration file is
+network-mip6.conf(5).  It is pretty self-explanatory but you may want
+to take a look at the man pages.  For run-time configuration and
+diagnostics use mipdiag(8).  See manual page for usage information.
+
+
+USAGE
+
+Included in the package the is an automatic startup script called
+"mobile-ip6" for the module.  Use "mobile-ip6 start" to start the
+module by hand and "mobile-ip6 stop" to unload.  This script reads the
+configuration files and configures module accordingly.
+
+Module may also be loaded by hand using insmod.  You cannot set Home
+Address nor Home Agent Address with insmod so Mobile Node will be left
+in a state where it does not know these addresses until given with
+mipdiag(8).  See provided init script for insmod options available.
+
+Automatic startup in RedHat and Debian
+
+On RedHat and Debian systems all init scripts are in /etc/init.d (or
+/etc/rc.d/init.d in older RedHats).  Runlevel directories /etc/rc?.d
+(or /etc/rc.d/rc?.d in older RedHats) contain symbolic links to actual
+scripts.  Links are managed in RedHat with chkconfig tool and in
+Debian with update-rc.d (both similar to IRIX chkconfig).  Doing
+'chkconfig mobile-ip6 --levels 345 on' in RedHat or 'update-rc.d
+mobile-ip6 start 75 3 4 5 stop 05 1 2 6' in Debian will set up all
+necessary links.
+
+
+NOTE ON DYNAMIC HOME AGENT ADDRESS DISCOVERY SUPPORT
+
+MIPL supports Dynamic Home Agent Address Discovery, DHAAD. DHAAD
+allows multiple home agents to exist on the same link for failover and
+load balancing. DHAAD is based on IPv6 anycast addresses.
+Home agent will automatically configure itself with a DHAAD anycast
+address based on its own router advertisements, which must contain the
+home address info option.
+
+HA supporting DHAAD must also run radvd (or other software capable of
+sending Router Advertisements with MIPv6 extensions) and advertise
+itself with H-bit (Home Agent) and R-bit (Router Address) set on every
+interface it serves as a Home Agent.  To enable DHAAD in Mobile Node,
+use  a zero address, i.e. 0::0/64 in network-mip6.conf for HA.
+
+PROXY DUPLICATE ADDRESS DETECTION 
+
+Home Agent performs duplicate address detection (DAD) for the home
+address of MN, when MN registers it initially. HA also defends the
+address for the duration of the registration. With multihomed MNs you
+should always set the highest (largest) preference to the home
+interface to avoid problems with proxy DAD. Otherwise MN will try to
+register its home address with HA through the interface with the
+highest preference, even though the home interface is still at home.
+
+Proxy DAD may also cause problems with DHAAD, in case MN has a valid
+registration with HA1, reboots and tries to register with HA2 or just
+boots at home (in which case ip -6 a command shows the address as tentative in 
+MN). 
+
+ROUTER ADVERTISEMENT DAEMON AND MOVEMENT DETECTION IN MN
+
+A Router Advertisement Daemon (radvd) should be installed on the
+routers of home and foreign networks which the mobile node may visit.
+Official radvd supports Mobile IPv6 extensions since version 0.6.2.
+radvd can be downloaded from:
+ 
+   http://v6web.litech.org/radvd/
+
+The radvd package includes needed installation and configuration
+notes. For optimal detection of movement by MN, you should set the
+router advertisement interval on in router advertisements. 
+
+There is an example radvd configuration file included in this package
+from our home agent. You should change the prefixes to match your own 
+network configuration before using it. 
+
+Mobile node can also poll the current router periodically using
+neighbor solicitations to verify its reachability. The sending of
+neighbor solicitations is done, if the mobile node has not received a
+router advertisement from it default router within the advertisement
+interval or for the maximum time router can be reachable.  
+
+The default value for the reachable time is 5 seconds and can be
+configured between 1 and 1000 seconds by setting
+/proc/sys/net/ipv6/mobility/max_router_reachable_time to the desired
+value. For example to set 2 seconds as the time: "echo 2 >
+/proc/sys/net/ipv6/mobility/max_router_reachable_time".
+
+Mobile Node currently supports modified eager cell switching and lazy
+cell switching, with eager cell switching being the default movement
+detection algorithm. This can be configured by setting
+/proc/sys/net/ipv6/mobility/eager_cell_switching to 0 (for lazy cell
+switching) or 1 (for eager cell switching).
+

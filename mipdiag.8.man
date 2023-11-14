@@ -1,0 +1,107 @@
+.TH mipdiag 8 "11 December 2002" "@VERSION@"
+.SH NAME
+mipdiag \- MIPL Mobile IPv6 diagnostics and configuration tool
+.SH SYNOPSIS
+.B mipdiag [-clmsIV?] [-d [
+.I integer
+.B ]] [-t [
+.I boolean
+.B ]] [-i
+.I interfacename
+.B -h 
+.I ipv6-address/prefix-length 
+.B -H 
+.I [ipv6-address/prefix-length]
+.B ] [-i 
+.I interfacename 
+.B -P 
+.I integer
+.B ]
+
+.SH DESCRIPTION
+.B mipdiag
+is diagnostics and configuration tool for MIPL Mobile IPv6 kernel
+module. You can get statistics and state information with it and set
+runtime parameters.
+
+.SH COMMON OPTIONS
+
+.IP "-?, --help"
+Show usage information
+.IP "-V, --version"
+Display mipdiag and MIPL version information.
+.IP "-c, --bcache"
+Print binding cache entries
+.IP "-d, --debuglevel [integer]"
+Set or get debug level. Levels from 0 to 7 exist. Default: 0. If used
+without argument, returns current value.
+.IP "-s, --statistics"
+Show general statistics
+
+.SH HOME AGENT OPTIONS
+.IP "-t, --tunnel_sitelocal [yes|no]"
+Set or get option whether site-local packets to mobile node should be
+tunneled. Default: yes. If called without argument, returns current
+value.
+
+.SH MOBILE NODE OPTIONS
+
+.IP "-h, --homeaddress ipv6-address/prefix-length"
+Set mobile node's home address to ipv6-address. Must use -H and -i
+with this option. New home addresses can be added to MN after startup
+with the limitation that two different home addresses cannot share the
+same home agent.
+.IP "-H, --homeagent [ipv6-address/prefix-length]"
+Set home agent address for mobile node. Must use -h and -i with this
+option. If address and prefix are omitted, Dynamic Home Agent Address
+Discovery is initiated.
+.IP "-m, --mninfo"
+Print Mobile Node information
+.IP "-l, --bulist"
+Print binding update list entries
+.IP "-I, --ifaces"
+Show the currently available interfaces and their preferences.
+.IP "-i, --if_name ifname"
+Set name of interface other options refer to. Must be used with -H,
+-h, and -P. E.g. eth0.
+.IP "-P, --set_if_pref preference"
+Set preference for an interface (e.g. set preference 3 to eth0 :
+"mipdiag -i eth0 -P3" ). MN uses by default the interface with the
+highest preference.  If a currently used interface is lost, MN
+switches to the interface with the next highest preference and
+performs a vertical handoff. The default preference is the interface
+identifier of an interface. MN also moves any manually configured home
+addresses from interfaces going down to the interface with the highest
+preference. MN moves the home addresses back to a reinstalled
+interface, when the interface returns to the home network of the home
+address.
+
+With multihomed MNs you should always set the highest (largest)
+preference to the home interface to avoid problems with proxy
+DAD. Otherwise MN will try to register its home address with HA
+through the interface with the highest preference, even though the
+home interface is still at home.
+
+.SH NOTES
+For some reason, with short options optional arguments must be typed
+without a space between the option and argument.
+
+.SH EXAMPLES
+
+.IP "mipdiag -i eth0 -h 3ffe:9999:1::1/64 -H"
+Assign home address 3ffe:9999:1::1 with prefix length of 64 to mobile
+node and start Dynamic Home Agent Address Discovery.
+
+.SH BUGS
+No known bugs.
+
+.SH FILES
+.I @sysconfdir@/network-mip6.conf
+.RS
+Mobile IPv6 main configuration file
+.RE
+
+.SH AUTHOR
+Antti J Tuominen <ajtuomin@tml.hut.fi>
+.SH "SEE ALSO"
+.BR network-mip6.conf(5)

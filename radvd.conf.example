@@ -1,0 +1,64 @@
+#This interface has HA support enabled
+interface eth0
+{
+        AdvSendAdvert on;
+	MaxRtrAdvInterval 3;
+	MinRtrAdvInterval 1;
+	AdvIntervalOpt on;
+	AdvSourceLLAddress on;
+	AdvHomeAgentFlag on;
+	HomeAgentLifetime 10000;
+	HomeAgentPreference 20;
+	AdvHomeAgentInfo on;
+	prefix 3ffe:2620:6:1::1111/64
+        {
+		AdvRouterAddr on;
+                AdvOnLink on;
+                AdvAutonomous on;
+		AdvPreferredLifetime 300;
+		AdvValidLifetime 400;
+	};
+};
+
+#This interface has HA support enabled
+interface eth1
+{
+        AdvSendAdvert on;
+	MaxRtrAdvInterval 3;
+	MinRtrAdvInterval 1;	
+	AdvIntervalOpt off;
+	AdvHomeAgentFlag on;
+	HomeAgentLifetime 10000;
+	HomeAgentPreference 20;
+	AdvHomeAgentInfo on;
+	prefix 3ffe:2620:6:2::1111/64
+        {
+		AdvRouterAddr on;
+                AdvOnLink on;
+                AdvAutonomous on;
+		AdvPreferredLifetime 10000;
+		AdvValidLifetime 12000;
+	};
+};
+# Router does not act as home agent on this interface
+interface eth2
+{
+        AdvSendAdvert on;
+        MaxRtrAdvInterval 3;
+        MinRtrAdvInterval 1;
+        AdvIntervalOpt off;
+#       AdvHomeAgentFlag on;
+#       HomeAgentLifetime 10000;
+#       HomeAgentPreference 20;
+#       AdvHomeAgentInfo on;
+        prefix 3ffe:2620:6:6::1111/64
+        {
+                AdvRouterAddr on;
+                AdvOnLink on;
+                AdvAutonomous on;
+                AdvPreferredLifetime 10000;
+                AdvValidLifetime 12000;
+        };
+};
+
+

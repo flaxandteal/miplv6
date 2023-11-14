@@ -1,0 +1,88 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(src/mipdiag.c)
+
+dnl Configure these parameters accordingly
+MIPV6_BASE_MODULE="mip6_base"
+MIPV6_MN_MODULE="mip6_mn"
+MIPV6_HA_MODULE="mip6_ha"
+TUNNEL_MODULE="ipv6_tunnel"
+MIPDIAG="mipdiag"
+IPV6TUNNEL="ipv6tunnel"
+INIT_RH6="/etc/rc.d/init.d"
+INIT_RH7="/etc/init.d"
+INIT_DEBIAN="/etc/init.d"
+INIT_SUSE="/sbin/init.d"
+INITDIRS="$INIT_RH6 $INIT_RH7 $INIT_DEBIAN $INIT_SUSE"
+
+dnl Note: First existing directory will be selected
+SYSCONFDIRS="/etc/sysconfig /etc"
+LOCKDIRS="/var/lock/subsys /var/lock"
+
+CFLAGS="-I../include -Wall -O2"
+
+LDLIBS="-L../lib -lnetlink"
+AC_SUBST(LDLIBS)
+
+NETWORK_MIP6_CONF=\$\(sysconfdir\) dnl by default
+
+dnl Check for programs & stuff
+VERSION=`grep -v ^# ./VERSION | tr -d '\012'`
+AC_PREFIX_DEFAULT()
+AC_PROG_CC
+AC_PATH_PROG(RM, rm)
+if test "x$RM" = "x" ; then AC_MSG_ERROR(Cannot find 'rm') ; fi
+AC_PATH_PROG(MKDIR, mkdir)
+if test "x$MKDIR" = "x" ; then AC_MSG_ERROR(Cannot find 'mkdir') ; fi
+AC_PATH_PROG(SED, sed)
+if test "x$SED" = "x" ; then AC_MSG_ERROR(Cannot find 'sed') ; fi
+AC_PATH_PROG(GZIP, gzip)
+if test "x$GZIP" = "x" ; then AC_MSG_WARN(Cannot find 'gzip') ; fi
+
+AC_SUBST(MIPV6_BASE_MODULE)
+AC_SUBST(MIPV6_MN_MODULE)
+AC_SUBST(MIPV6_HA_MODULE)
+AC_SUBST(TUNNEL_MODULE)
+AC_SUBST(MIPDIAG)
+AC_SUBST(IPV6TUNNEL)
+AC_SUBST(VERSION)
+
+AC_CHECKING(for initdir)
+for dir in $INITDIRS ; do
+	if test -d $dir ; then
+		INITDIR=$dir
+		break
+	fi
+done
+AC_SUBST(INITDIR)
+
+AC_CHECKING(for sysconfdir)
+for dir in $SYSCONFDIRS ; do
+	if test -d $dir ; then
+		NETWORK_MIP6_CONF=$dir
+		break
+	fi
+done
+AC_SUBST(NETWORK_MIP6_CONF)
+
+AC_CHECKING(for lockdir)
+for dir in $LOCKDIRS ; do
+	if test -d $dir ; then
+		LOCKDIR=$dir
+		break
+	fi
+done
+AC_SUBST(LOCKDIR)
+
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h malloc.h sys/ioctl.h sys/time.h syslog.h unistd.h)
+
+AC_C_CONST
+AC_HEADER_TIME
+AC_STRUCT_TM
+
+AC_CHECK_FUNCS(gettimeofday select socket strerror strstr strtoul)
+
+AC_OUTPUT(Makefile src/Makefile lib/Makefile mobile-ip6)

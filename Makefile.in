@@ -1,0 +1,111 @@
+#
+#      Makefile for mipdiag
+#
+#      Authors:
+#      Jaakko Laine <jaakko.laine@hut.fi>
+#
+#      This program is free software; you can redistribute it and/or
+#      modify it under the terms of the GNU General Public License
+#      as published by the Free Software Foundation; either version
+#      2 of the License, or (at your option) any later version.
+
+SHELL = @SHELL@
+
+VERSION = @VERSION@
+
+CC = @CC@
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+sbindir = @sbindir@
+libdir = @libdir@
+sysconfdir = @sysconfdir@
+mandir = /usr/man
+man5dir = $(mandir)/man5
+man8dir = $(mandir)/man8
+initdir = @INITDIR@
+initscript = mobile-ip6
+docdir = /usr/share/doc/mobile-ip6
+
+NETWORK_MIP6_CONF = @NETWORK_MIP6_CONF@
+
+RM = @RM@
+MKDIR = @MKDIR@
+SED = @SED@
+GZIP = @GZIP@
+
+CFLAGS = @CFLAGS@
+LDFLAGS = @LDFLAGS@
+LDLIBS = @LDLIBS@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+
+### End of configuration section ###
+
+MIPDIAG = src/@MIPDIAG@
+IPV6TUNNEL = src/@IPV6TUNNEL@
+
+SUBDIRS = lib src
+
+LIBNETLINK=../lib/libnetlink.a
+
+MAN_FILES = mipdiag.8.man network-mip6.conf.5.man
+MANS =  mipdiag.8 network-mip6.conf.5
+
+CONF_AUTO_FILES = config.cache config.log config.status
+
+.SUFFIXES:
+.SUFFIXES: .c .o .man
+
+all: $(MANS)
+	@set -e; \
+	for i in $(SUBDIRS); \
+	do $(MAKE) -C $$i; done
+
+clean:
+	for i in $(SUBDIRS); \
+	do $(MAKE) -C $$i clean; done
+	$(RM) -f core $(MANS) mobile-ip6 \
+	$(CONF_AUTO_FILES) Makefile
+
+install: all
+	@set -e; \
+	for i in src; \
+	do $(MAKE) -C $$i install; done
+
+	@for dir in $(bindir) $(man5dir) $(man8dir) $(sysconfdir) $(docdir) ; do \
+		$(MKDIR) -p $$dir ; \
+	done
+
+	@$(INSTALL_PROGRAM) -m 0755 $(initscript) $(initdir)/$(initscript)
+
+	@$(INSTALL_DATA) mipdiag.8 $(man8dir)/mipdiag.8
+	@$(GZIP) -9 -f $(man8dir)/mipdiag.8
+
+	@for file in $(MANS) ; do \
+		$(INSTALL_DATA) $$file $(man5dir)/$$file ; \
+		$(GZIP) -9 -f $(man5dir)/$$file ; \
+	done
+
+	@for file in README INSTALL ; do \
+		$(INSTALL_DATA) $$file $(docdir)/$$file ; \
+	done
+
+	@if test ! -f $(NETWORK_MIP6_CONF)/network-mip6.conf ; then \
+		$(INSTALL_DATA) network-mip6.conf $(NETWORK_MIP6_CONF)/network-mip6.conf ; \
+	fi
+
+man: $(MANS)
+
+.c.o:
+	$(CC) -c $(CFLAGS) $<
+
+.man:
+	@$(SED)	-e 's#@''VERSION''@#$(VERSION)#g' \
+		-e 's#@''sbindir''@#s(sbindir)#g' \
+		-e 's#@''sysconfdir''@/network-mip6.conf#$(NETWORK_MIP6_CONF)/network-mip6.conf#g' \
+		-e 's#@''sysconfdir''@#$(sysconfdir)#g' \
+		$< > $@

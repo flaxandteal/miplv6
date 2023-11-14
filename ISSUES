@@ -1,0 +1,43 @@
+Known issues with MIPL Mobile IPv6 v1.0
+
+Issue 1: HAO placement 
+
+Home Address Destination Option should really be added to a new
+destination option header specified in Mobile IPv6 spec which should
+be placed after routing header(s), but before fragmentation header.
+Putting HAO in DO1 works for now, but support for the new placement
+should be added to the IPv6 stack.
+
+Solution: Add support for third DO placement in Linux IPv6 stack.
+When: v1.x, maybe.
+
+Issue 2: MH protection with IPSec 
+
+Authentication & authorization of Mobile IPv6 messages between MN and
+HA is missing. This will not be supported by the MIPL team in the 2.4
+kernels unless someone backports the IPSec in 2.6 kernels to 2.4
+kernels. 
+
+Solution: Switch to 2.6 kernel series.
+
+When: v1.x
+
+Issue 3: Mobile Prefix discovery and bootstrapping
+
+Mobile prefix discovery is disabled in MIPL 1.0., since it does not
+work properly in the Mobile IPv6 draft version 24 wrt. to
+bootstrapping and security.
+
+Solution: Fix mipv6 standard.
+
+When: v1.x, maybe.
+
+Issue 4: Home prefix length is 64 bits.
+
+A prefix length of 64 is always used for home prefix.
+
+Solution: Add extra parameter to rtnetlink message which configures
+home address and agent.
+
+When: v1.x 
+

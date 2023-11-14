@@ -1,0 +1,66 @@
+.TH network-mip6.conf 5 "30 September 2003" "@VERSION@"
+.SH NAME
+network-mip6.conf \- MIPL Mobile IPv6 main configuration file
+.SH DESCRIPTION
+.B network-mip6.conf
+is the main configuration file for MIPL Mobile IPv6 kernel
+module. This file is used by automatic startup script to set up
+parameters for the kernel module.
+.SH SYNTAX
+Configuration file consists of option and value pairs: OPTION=value. 
+Option name must be in all capitals. Value is case-insensitive.
+.SH OPTIONS
+.IP "FUNCTIONALITY"
+Should this node act as a home agent (ha), mobile node (mn) or
+correspondent node (cn). HA and MN both have CN functionality
+embedded. Default: cn.
+.IP "DEBUGLEVEL"
+In error situations it may be desired to get more detailed
+information what is happening. Increase this value to get more
+messages from the module (default: 0).
+.IP "TUNNEL_SITELOCAL"
+Should unicasts to node's site-local address be tunneled when mobile
+node is not in its home network (default: yes).
+.IP "MIN_TUNNEL_NR"
+Minimum number of free tunnel devices kept in cache on HA
+Must be set to at least 1 for HA. To ensure successful 
+bindings even during high work loads it could be set to a bigger 
+value on the HA.
+.IP "MAX_TUNNEL_NR"
+Maximum number of free tunnel devices kept in cache on MN or HA
+Must be set to at least 1 for HA. To improve performance
+set it higher than MIN_TUNNEL_NR
+.IP "HOMEADDRESS"
+Home address for mobile node with prefix length which must be 128. Example:
+3FFE:2620:6:1234:ABCD::1/128 (Don't use the example value!)
+.IP "HOMEAGENT"
+Home agent's address for mobile node with prefix length of the home
+network. Note that only a prefix length of 64 for home network is
+supported. Set this to 0::0/64 to activate dynamic home agent address
+discovery in MN.
+.IP "HOMEDEVICE"
+Home address is assigned to an interface.  This option specifies which
+interface is used. You should set this to mip6mnha1 which is a virtual
+tunnel interface to which home address is moved at startup. The home
+address will be later assigned automatically to any physical interface
+that is in the home network. When MN moves away from its home network
+or the network device is removed the address will be reassigned to the
+virtual interface.
+.SH EXAMPLES
+.PP
+  # Home Agent configuration file
+  FUNCTIONALITY=ha
+  DEBUGLEVEL=1
+  TUNNEL_SITELOCAL=yes
+
+  # Mobile Node configuration file
+  FUNCTIONALITY=mn
+  DEBUGLEVEL=1
+  HOMEDEV=mip6mnha1	
+  HOMEADDRESS=3ffe:2620:6:1234:abcd::2/128
+  HOMEAGENT=3ffe:2620:6:1234:abcd::1/64
+.PP
+.SH AUTHOR
+Antti J Tuominen <ajtuomin@tml.hut.fi>
+.SH "SEE ALSO"
+.BR mipdiag(8)

@@ -1,0 +1,162 @@
+#!/bin/sh
+#
+# Load MIPL Mobile IPv6 module
+#
+# chkconfig: 345 75 05
+# description: Automatically loads MIPL Mobile IPv6 kernel module and
+# configures it. See http://www.mipl.mediapoli.com/ for more information.
+# config: /etc/sysconfig/network-mip6.conf
+#
+# @configure_input@
+
+MIPV6_BASE_MODULE=@MIPV6_BASE_MODULE@
+MIPV6_MN_MODULE=@MIPV6_MN_MODULE@
+MIPV6_HA_MODULE=@MIPV6_HA_MODULE@
+MIPV6_MODULE=
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+initdir=@INITDIR@
+sysconfdir=@sysconfdir@
+
+CONFIG_FILE=@NETWORK_MIP6_CONF@/network-mip6.conf
+MIPDIAG=@sbindir@/mipdiag
+SUBSYS=$1
+LOCKDIR=@LOCKDIR@
+
+MODPROBE=@sbindir@/modprobe
+LSMOD=@sbindir@/lsmod
+
+# Test if 'functions' exists. If not, define our own 'action'
+if test -x /etc/rc.d/init.d/functions ; then
+    . /etc/rc.d/init.d/functions
+elif test -x /etc/rc.config ; then
+    . /etc/rc.config
+else
+    action() {
+	msg=$1
+	shift
+	eval "$*" >/dev/null 2>&1
+	ret=$?
+	if test $ret = 0 -a "x$*" != "x" ; then
+	    msg=$msg" OK"
+	else
+	    msg=$msg" Failed"
+	fi
+	logger $msg
+	echo $msg
+    }
+fi
+
+if [ -r $CONFIG_FILE ] ; then
+    . $CONFIG_FILE
+else
+    echo "Cannot read configuration file: $CONFIG_FILE"
+    exit 1
+fi
+
+for file in $MIPDIAG $MODPROBE $LSMOD ; do
+    if [ ! -x $file ] ; then
+	echo "Cannot execute: $file"
+	exit 1
+    fi
+done
+
+if [ "$FUNCTIONALITY" = "mn" ] ; then
+    MIPV6_MODULE=$MIPV6_MN_MODULE
+elif [ "$FUNCTIONALITY" = "ha" ] ; then
+    MIPV6_MODULE=$MIPV6_HA_MODULE
+else
+    MIPV6_MODULE=$MIPV6_BASE_MODULE
+fi
+
+if [ -z "$HOMEADDRESS" -a "$FUNCTIONALITY" = "mn" ] ; then
+    echo "Home address not set for mobile node"
+    exit 1
+fi
+
+case "$1" in
+    start)
+	$LSMOD | grep $MIPV6_MODULE &>/dev/null && \
+	    echo "$MIPV6_MODULE already installed" && exit 1
+
+	INSMOD_ARGS=
+
+	if [ -n "$DEBUGLEVEL" ] ; then
+	    INSMOD_ARGS="$INSMOD_ARGS mipv6_debug=$DEBUGLEVEL"
+	fi
+
+	$MODPROBE $MIPV6_BASE_MODULE $INSMOD_ARGS &> /dev/null
+	status=$?
+
+	if [ "$FUNCTIONALITY" = "mn" -o "$FUNCTIONALITY" = "ha" ] ; then
+	    $MODPROBE $MIPV6_MODULE &> /dev/null
+	fi
+
+	action "Starting Mobile IPv6:" [ $status -eq 0 ] || exit 1
+
+	touch $LOCKDIR/mobile-ip6
+
+	# Temporary kludge to control get the new sysctls working.
+	# Should probably be integrated into mipdiag at some time.
+
+	if [ "$FUNCTIONALITY" = "ha" ] ; then 
+	    if [ -n "$MIN_TUNNEL_NR" ] ; then
+		echo $MIN_TUNNEL_NR > /proc/sys/net/ipv6/mobility/min_tnls
+	    fi
+
+	    if [ -n "$MAX_TUNNEL_NR" ] ; then
+		echo $MAX_TUNNEL_NR > /proc/sys/net/ipv6/mobility/max_tnls
+	    fi
+	fi
+
+	if [ "$FUNCTIONALITY" = "mn" ] ; then
+	    [ -n "$HOMEADDRESS" ] && \
+	    $MIPDIAG -i $HOMEDEV -h $HOMEADDRESS -H$HOMEAGENT
+	fi
+
+	if [ "$FUNCTIONALITY" = "ha" -a -n "$TUNNEL_SITELOCAL" ] ; then
+	    $MIPDIAG -t$TUNNEL_SITELOCAL
+	fi
+
+	if [ "$FUNCTIONALITY" = "ha" ] ; then 
+	    echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+	fi 
+	;;
+
+    stop)
+	action "Stopping Mobile IPv6:" [ -f $LOCKDIR/mobile-ip6 ] || exit 1
+
+	$MODPROBE -r $MIPV6_MODULE
+
+	rm -f $LOCKDIR/mobile-ip6
+	exit $?
+	;;
+
+    restart)
+	$0 stop
+	$0 start
+	exit $?
+	;;
+
+    status)
+	$LSMOD | grep $MIPV6_MODULE > /dev/null
+	if [ $? -eq 0 ]; then
+		echo "$MIPV6_MODULE module is installed..."
+		exit 0
+	fi
+       	# See if lock in $LOCKDIR exists
+	if [ -f $LOCKDIR/mobile-ip6 ]; then
+		echo "$MIPV6_MODULE module not installed but subsys locked"
+		exit 2
+	fi
+
+	echo "$MIPV6_MODULE module is not installed"
+	exit 3
+	;;
+
+    *)
+	echo "Usage mobile-ip6 {start|stop|status|restart}"
+	exit 1
+	;;
+esac

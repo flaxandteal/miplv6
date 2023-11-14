@@ -1,0 +1,81 @@
+INTRODUCTION
+
+Mobile IPv6 (or Mobility support in IPv6) provides transparent
+mobility for Internet Protocol version 6.  Protocols above IP should
+not be affected.
+
+This file describes how to install MIPL Mobile IPv6 for Linux in the
+Linux kernel.  See INSTALL for the userspace part.
+
+
+INSTALLATION
+
+MIPL Mobile IPv6 comes as a kernel patch for the 2.4.x series.  It has
+been tested with various 2.4.x kernels.  The kernel patch is named
+mipv6-a.b-v2.4.x.patch (where a and b are the major and minor version
+numbers of MIPL and x is the kernel version sub-level against which
+the patch was made).  This patch should only be applied against fresh
+2.4.x tree (or later; provided no changes have been made in the
+net/ipv6 directory).
+
+MIPL MIPv6 has only been tested on Redhat system but should work on
+any Linux system assuming you already have working 2.4.x kernel and
+IPv6 environment.
+
+Assuming you have a fresh 2.4.x kernel tree in /usr/src/linux do the
+following:
+
+cd /usr/src/linux
+patch -p1 --dry-run < mipv6-a.b-v2.4.x.patch
+
+This does not actually do anything but display errors if any.  If you
+get any failed hunks, you should NOT proceed.  If everything went fine
+do:
+
+patch -p1 < mipv6-a.b-v2.4.x.patch
+
+Now your kernel tree is ready for configuration.  Run your favorite
+'make *config'.  Make sure you have at least the following options
+set.  For easy checking use chkconf_kernel.sh in userspace.
+
+ CONFIG_EXPERIMENTAL=y 
+ CONFIG_SYSCTL=y 
+ CONFIG_PROC_FS=y 
+ CONFIG_MODULES=y 
+ CONFIG_NET=y 
+ CONFIG_NETFILTER=y 
+ CONFIG_UNIX=y 
+ CONFIG_INET=y 
+ CONFIG_IPV6=m
+ CONFIG_IPV6_SUBTREES=y
+ CONFIG_IPV6_IPV6_TUNNEL=m
+ CONFIG_IPV6_MOBILITY=m
+
+You may choose 'y' instead of 'm' if you don't want to build Mobile
+IPv6 as a module.  The last configuration option is the newly added
+Mobility Support.  Selecting this enables Mobile IPv6 Correspondent
+node operation.  You may also select following options:
+
+ CONFIG_IPV6_MOBILITY_MN
+ CONFIG_IPV6_MOBILITY_HA
+ CONFIG_IPV6_MOBILITY_DEBUG
+
+First two control whether you want to have Mobile node or Home agent
+functionality enabled in addition to Correspondent node.  MN and HA
+can be enabled but not used at the same time.  The last one turns on
+debugging messages for MIPL.  Since MIPL is still work-in-progress you
+might want to enable this.  With debug messages it is easier to figure
+out what happened when something goes wrong.  Also when reporting a
+bug debug messages are very helpful.
+
+After you are satisfied with your configuration save changes and exit.
+Run 'make dep' and compile and install the new kernel and modules.
+The kernel part is now done.  See INSTALL for how to install userspace
+tools.
+
+
+CONFIGURATION
+
+Userspace tool mipdiag(8) is used for configuration.  See INSTALL,
+network-mip6.conf(5), and mipdiag(8) for more information.
+
